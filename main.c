@@ -1,7 +1,3 @@
-#include <stdio.h> 
-#include <stdlib.h> 
-#include <termios.h>
-#include <bool.h>
 #include "main.h"
 
 int moveBuffer(char* buffer, size_t* cursor, int input, size_t* length)
@@ -47,18 +43,21 @@ InputType FindInputType(char input)
 
 }
 
-int handleInputTypes(char* buffer, InputType type, size_t* length , size_t* cursor)
+int handleInputTypes(char* buffer, char input, InputType type, size_t* length , size_t* cursor)
 {
     switch(type)
+    {
     case INPUT_NORMAL:
         moveBuffer(&buffer, &cursor, input , &length);
+        break;
     case INPUT_ENTER:
         return -1;
         break;
     case INPUT_INSERT:
-        isInsertOn == !isInsertOn;
+        isInsertOn = !isInsertOn;
         return 0;
         break;
+}
 }
 
 int ReadInput(char* buffer)
@@ -74,15 +73,15 @@ int ReadInput(char* buffer)
     do
     {
         read(STDIN_FILENO, &input, 1);
-        type = FindInputType(char input);
-        handle = handleInputTypes(&buffer , type, length, cursor);
-    } while(s != -1)
+        type = FindInputType(input);
+        handle = handleInputTypes(&buffer , input, type, &length, &cursor);
+    } while(handle != -1);
 }
 
 int main()
 {
 
-    char buffer[MAX_INPUT];
+    char buffer[BUFFER_SIZE];
 
 
     while(1)
