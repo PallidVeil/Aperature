@@ -21,6 +21,6 @@ typedef enum {
     INPUT_INSERT
 } InputType;
 
-bool isInsertOn = true;
+extern bool isInsertOn;
 
 #endif

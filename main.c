@@ -2,6 +2,17 @@
 
 int moveBuffer(char* buffer, size_t* cursor, int input, size_t* length)
 {
+    int curr , next;
+    int movingWay = 0;
+    if (input == 127) //backspace
+    {
+        if (*cursor > 0)
+        {
+            
+            movingWay = -1;
+        }
+        
+    }
     if (isInsertOn)
     {
 
@@ -9,6 +20,17 @@ int moveBuffer(char* buffer, size_t* cursor, int input, size_t* length)
     else
     {
 
+    }
+
+    if (movingWay == -1)
+    {
+        for (int i = *cursor; i < *length; i++)
+        {
+            buffer[i] = buffer[i + 1];
+        }
+    (*cursor)--;
+    (*length)--;
+    buffer[*length] = '\0';
     }
 }
 
