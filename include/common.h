@@ -1,5 +1,5 @@
-#ifndef main.h
-#define main.h
+#ifndef COMMON_H
+#define COMMON_H
 
 #include <stdbool.h>
 #include <stdio.h> 

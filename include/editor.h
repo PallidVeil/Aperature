@@ -16,6 +16,17 @@ typedef struct {
     char input;
 } Editor;
 
+void moveCursorLeft(Editor *editor);
+void moveCursorRight(Editor *editor);
+void moveCursorHome(Editor *editor);
+void moveCursorEnd(Editor *editor);
+
+InputType FindInputType(char input);
+int handleInputTypes(char *buffer, Editor *editor, InputType type);
+
+void setInsertOrOverwriteCursor(void);
+void HandleInputMovement(char *buffer, Editor *editor);
+
 extern bool isInsertOn;
 
 #endif

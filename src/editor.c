@@ -1,13 +1,42 @@
-#include "main.h"
+#include "common.h"
 #include "editor.h"
 
-void moveBuffer(char* buffer, Editor *e)
+bool isInsertOn = true;
+
+void moveCursorLeft(Editor *editor)
 {
-    int curr , next;
+    if (editor->cursor <= 0)
+    return;
+    editor->cursor--;
+    printf("\033[D");
+}
+
+void moveCursorRight(Editor *editor)
+{
+    if (editor->cursor >= editor->length)
+        return;
+    editor->cursor++;
+    printf("\033[C");
+}
+
+void moveCursorHome(Editor *editor)
+{
+    editor->cursor = 0;
+    printf("\033[%zuD", editor->cursor);
+}
+
+void moveCursorEnd(Editor *editor)
+{
+    editor->cursor = editor->length;
+    printf("\033[%zuC", editor->length - editor->cursor);
+}
+
+void HandleInputMovement(char* buffer, Editor *editor)
+{
     int movingWay = 0;
-    if (e->input == 127) //backspace
+    if (editor->input == 127) //backspace
     {
-        if (e->cursor > 0)
+        if (editor->cursor > 0)
             movingWay = -1;
     }
     else if (isInsertOn)
@@ -16,66 +45,33 @@ void moveBuffer(char* buffer, Editor *e)
     }
     else
     {
-        buffer[(e->cursor)++] = e->input;
+        buffer[(editor->cursor)] = editor->input;
+        moveCursorRight(editor);
     }
 
     if (movingWay == -1)
     {
-        for (int i = e->cursor; i < e->length; i++)
+        for (size_t i = editor->cursor; i < editor->length; i++)
         {
             buffer[i] = buffer[i + 1];
         }
-    e->cursor--;
-    e->length--;
-    buffer[e->length] = '\0';
+    moveCursorLeft(editor);
+    editor->length--;
+    buffer[editor->length] = '\0';
     }
     else if (movingWay == 1)
     {
-        e->length++;
-        for(int i = e->length; i > e->cursor ; i--)
+        editor->length++;
+        for(size_t i = editor->length; i > editor->cursor ; i--)
         {
             buffer[i + 1] = buffer[i];
         }
-        buffer[(e->cursor)++] = e->input;
-        buffer[e->length] = '\0';
+        buffer[(editor->cursor)] = editor->input;
+        moveCursorRight(editor);
+        buffer[editor->length] = '\0';
     }
 }
 
-void moveTerminalCursor(int amount)
-{
-    if (amount > 0)
-        printf("\x1b[%dC", amount);
-    else if (amount < 0)
-        printf("\x1b[%dD", -amount);
-}
-
-void cursorLeft(Editor *e)
-{
-    if (e->cursor < 0)
-    return;
-    e->cursor--;
-    printf("\033[D");
-}
-
-void cursorRight(Editor *e)
-{
-    if (e->cursor >= e->length)
-        return;
-    e->cursor++;
-    printf("\033[C");
-}
-
-void cursorHome(Editor *e)
-{
-    e->cursor = 0;
-    printf("\033[%zuD", e->cursor);
-}
-
-void cursorEnd(Editor *e)
-{
-    e->cursor = e->length;
-    printf("\033[%zuC", e->length - e->cursor);
-}
 
 InputType FindInputType(char input)
 {
@@ -99,19 +95,38 @@ InputType FindInputType(char input)
 
 }
 
-int handleInputTypes(char* buffer, Editor *e, InputType type)
+void setInsertOrOverwriteCursor(void)
+{
+    if (isInsertOn)
+        printf("\033[2 q");
+    else    
+        printf("\033[6 q");
+}
+
+int handleInputTypes(char* buffer, Editor *editor, InputType type)
 {
     switch(type)
     {
     case INPUT_NORMAL:
-        moveBuffer(buffer, &e->cursor, e->input, &e->length);
+        HandleInputMovement(buffer, editor);
         break;
     case INPUT_ENTER:
         return -1;
         break;
     case INPUT_INSERT:
         isInsertOn = !isInsertOn;
+        setInsertOrOverwriteCursor();
         return 0;
         break;
+    case INPUT_BACKSPACE:
+        HandleInputMovement(buffer, editor);
+        break;
+    case INPUT_TAB:
+        return 0;
+        break;
+    case INPUT_ESCAPE:
+        return -1;
+        break;
 }
+return 0;
 }
