@@ -14,9 +14,6 @@ typedef enum {
     INPUT_ENTER,
     INPUT_BACKSPACE,
     INPUT_TAB,
-    INPUT_CTRL_C,
-    INPUT_CTRL_D,
-    INPUT_CTRL_Z,
     INPUT_ESCAPE,
     INPUT_INSERT
 } InputType;

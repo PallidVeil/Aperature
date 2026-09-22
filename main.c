@@ -1,25 +1,21 @@
 #include "main.h"
 
-int moveBuffer(char* buffer, size_t* cursor, int input, size_t* length)
+void moveBuffer(char* buffer, size_t* cursor, int input, size_t* length)
 {
     int curr , next;
     int movingWay = 0;
     if (input == 127) //backspace
     {
         if (*cursor > 0)
-        {
-            
             movingWay = -1;
-        }
-        
     }
-    if (isInsertOn)
+    else if (isInsertOn)
     {
-
+        movingWay = 1;
     }
     else
     {
-
+        buffer[(*cursor)++] = input;
     }
 
     if (movingWay == -1)
@@ -32,26 +28,26 @@ int moveBuffer(char* buffer, size_t* cursor, int input, size_t* length)
     (*length)--;
     buffer[*length] = '\0';
     }
+    else if (movingWay = 1)
+    {
+        for(int i = (*length)++; i > *cursor ; i--)
+        {
+            buffer[i + 1] = buffer[i];
+        }
+        buffer[(*cursor)++] = input;
+        buffer[*length] = '\0';
+    }
 }
 
 InputType FindInputType(char input)
 {
     switch (input) {
-        case 3:
-            return INPUT_CTRL_C;
-
-        case 4:
-            return INPUT_CTRL_D;
-
         case 9:
             return INPUT_TAB;
 
         case 10:
         case 13:
             return INPUT_ENTER;
-
-        case 26:
-            return INPUT_CTRL_Z;
 
         case 27:
             return INPUT_ESCAPE;
