@@ -51,24 +51,30 @@ void moveTerminalCursor(int amount)
 
 void cursorLeft(Editor *e)
 {
-    if (e->cursor > 0)
-        e->cursor--;
+    if (e->cursor < 0)
+    return;
+    e->cursor--;
+    printf("\033[D");
 }
 
 void cursorRight(Editor *e)
 {
-    if (e->cursor < e->length)
-        e->cursor++;
+    if (e->cursor >= e->length)
+        return;
+    e->cursor++;
+    printf("\033[C");
 }
 
 void cursorHome(Editor *e)
 {
     e->cursor = 0;
+    printf("\033[%zuD", e->cursor);
 }
 
 void cursorEnd(Editor *e)
 {
     e->cursor = e->length;
+    printf("\033[%zuC", e->length - e->cursor);
 }
 
 InputType FindInputType(char input)
