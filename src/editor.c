@@ -33,8 +33,38 @@ void moveCursorEnd(Editor *editor)
 
 void HandleEscSequence(char* buffer, Editor *editor)
 {
+    char sequenceBuffer[MAX_ESCAPE_SEQUENCE_LENGTH] = {0};
+    int i = 0;
+    int timeoutcheck;
+    while (1)
+    {
+        timeoutcheck = poll(stdin,  POLLTIMEOUT);
+        if (i >= MAX_ESCAPE_SEQUENCE_LENGTH - 1)
+            break;
+        if (timeoutcheck == 0)
+            break;
+        if (timeoutcheck == -1)// error add a check later
+            break;
+        read(STDIN_FILENO, &sequenceBuffer[i], 1);
+        i++;
+    }
+    findEscapeSequenceType(sequenceBuffer[0]);
+}
 
-
+InputType FindEscapeSequenceType(char input)
+{
+    switch (input) {
+        case 'A':
+            return INPUT_UP;
+        case 'B':
+            return INPUT_DOWN;
+        case 'C':
+            return INPUT_RIGHT;
+        case 'D':
+            return INPUT_LEFT;
+        default:
+            return INPUT_NORMAL;
+    }
 }
 
 void HandleInputMovement(char* buffer, Editor *editor)
@@ -128,7 +158,7 @@ int handleInputTypes(char* buffer, Editor *editor, InputType type)
         return 0;
         break;
     case INPUT_ESCAPE:
-        handleEscSequence(buffer, editor);
+        HandleEscSequence(buffer, editor);
         return 0;
         break;
 }

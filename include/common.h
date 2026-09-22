@@ -8,5 +8,7 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE 1024
+#define MAX_ESCAPE_SEQUENCE_LENGTH 10
+#define POLLTIMEOUT 50 // milliseconds
 
 #endif
