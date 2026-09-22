@@ -31,6 +31,12 @@ void moveCursorEnd(Editor *editor)
     printf("\033[%zuC", editor->length - editor->cursor);
 }
 
+void HandleEscSequence(char* buffer, Editor *editor)
+{
+
+
+}
+
 void HandleInputMovement(char* buffer, Editor *editor)
 {
     int movingWay = 0;
@@ -82,13 +88,10 @@ InputType FindInputType(char input)
         case 10:
         case 13:
             return INPUT_ENTER;
-
         case 27:
             return INPUT_ESCAPE;
-
         case 127:
             return INPUT_BACKSPACE;
-
         default:
             return INPUT_NORMAL;
     }
@@ -125,7 +128,8 @@ int handleInputTypes(char* buffer, Editor *editor, InputType type)
         return 0;
         break;
     case INPUT_ESCAPE:
-        return -1;
+        handleEscSequence(buffer, editor);
+        return 0;
         break;
 }
 return 0;

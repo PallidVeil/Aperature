@@ -7,7 +7,8 @@ typedef enum {
     INPUT_BACKSPACE,
     INPUT_TAB,
     INPUT_ESCAPE,
-    INPUT_INSERT
+    INPUT_INSERT,
+    INPUT_DELETE
 } InputType;
 
 typedef struct {
