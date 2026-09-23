@@ -29,6 +29,7 @@ typedef struct {
     size_t cursor;
     char input;
     bool delete;
+    struct termios orig_termios;
 } Editor;
 
 #define POLLTIMEOUT 50 // milliseconds
@@ -46,6 +47,9 @@ int handleInputTypes(char *buffer, Editor *editor, InputType type);
 void setInsertOrOverwriteCursor(void);
 void HandleInputMovement(char *buffer, Editor *editor);
 int executeEscapeSequence(InputType type,char* buffer, Editor *editor);
+void HandleEscSequence(char* buffer, Editor *editor);
+void EnterRawMode(struct termios *orig_termios);
+void DisableRawMode(struct termios *orig_termios);
 
 
 extern bool isInsertOn;

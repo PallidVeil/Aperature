@@ -31,6 +31,28 @@ void moveCursorEnd(Editor *editor)
     printf("\033[%zuC", editor->length - editor->cursor);
 }
 
+void EnterRawMode(struct termios *orig_termios)
+{
+    struct termios raw;
+    tcgetattr(STDIN_FILENO, orig_termios);
+    raw = *orig_termios;
+    raw.c_lflag &= ~(ECHO | ICANON | ISIG);
+    raw.c_iflag &= ~(IXON | ICRNL);
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+}
+
+void DisableRawMode(struct termios *orig_termios)
+{
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, orig_termios);
+}
+
+void TerminalRenderer(char* buffer, Editor *editor)
+{
+    printf("\033[2K\r");
+    printf("%s", buffer);
+    printf("\033[%zuG", editor->cursor + 1);
+}
+
 int executeEscapeSequence(InputType type,char* buffer, Editor *editor)
 {
     switch(type)

@@ -6,6 +6,8 @@ int ReadInput(char* buffer, Editor *editor)
     InputType type;
 
     int handle;
+
+    EnterRawMode(&editor->orig_termios);
     
     do
     {
@@ -13,6 +15,7 @@ int ReadInput(char* buffer, Editor *editor)
         type = FindInputType(editor->input);
         handle = handleInputTypes(buffer, editor, type);
     } while(handle != -1);
+    DisableRawMode(&editor->orig_termios);
     return 0;
 }
 
@@ -38,5 +41,6 @@ int main()
 
 
         free(buffer);
+        break;
     }
 }
