@@ -31,14 +31,115 @@ void moveCursorEnd(Editor *editor)
     printf("\033[%zuC", editor->length - editor->cursor);
 }
 
+int executeEscapeSequence(InputType type,char* buffer, Editor *editor)
+{
+    switch(type)
+    {
+        case INPUT_UP:
+            return 0;
+            break;
+        case INPUT_DOWN:
+            return 0;
+            break;
+        case INPUT_LEFT:
+            moveCursorLeft(editor);
+            return 0;
+            break;
+        case INPUT_RIGHT:
+            moveCursorRight(editor);
+            return 0;
+            break;
+        case INPUT_HOME:
+            moveCursorHome(editor);
+            return 0;
+            break;
+        case INPUT_END:
+            moveCursorEnd(editor);
+            return 0;
+            break;
+        case INPUT_INSERT:
+            isInsertOn = !isInsertOn;
+            setInsertOrOverwriteCursor();
+            return 0;
+            break;
+        case INPUT_DELETE:
+            editor->delete = true;
+            HandleInputMovement(buffer, editor);
+            editor->delete = false;
+            return 0;
+            break;
+        case INPUT_PAGE_UP:
+            return 0;
+            break;
+        case INPUT_PAGE_DOWN:
+            return 0;
+            break;
+        case INPUT_CONTROL_UP:
+            return 0;
+            break;
+        case INPUT_CONTROL_DOWN:
+            return 0;
+            break;
+        case INPUT_CONTROL_LEFT:
+            return 0;
+            break;
+        case INPUT_CONTROL_RIGHT:
+            return 0;
+            break;
+        case INPUT_UNKNOWN:
+            return 0;
+            break;
+        default:
+            return 0;
+            break;
+    }
+}
+
+InputType FindEscapeSequenceType(char* sequence)
+{
+    if(strcmp(sequence, "[A") == 0)
+        return INPUT_UP;
+    else if(strcmp(sequence, "[B") == 0)
+        return INPUT_DOWN;
+    else if(strcmp(sequence, "[C") == 0)
+        return INPUT_RIGHT;
+    else if(strcmp(sequence, "[D") == 0)
+        return INPUT_LEFT;
+    else if(strcmp(sequence, "[H") == 0)
+        return INPUT_HOME;
+    else if(strcmp(sequence, "[F") == 0)
+        return INPUT_END;
+    else if(strcmp(sequence, "[2~") == 0)
+        return INPUT_INSERT;
+    else if(strcmp(sequence, "[3~") == 0)
+        return INPUT_DELETE;
+    else if(strcmp(sequence, "[5~") == 0)
+        return INPUT_PAGE_UP;
+    else if(strcmp(sequence, "[6~") == 0)
+        return INPUT_PAGE_DOWN;
+    else if(strcmp(sequence, "[1;5A") == 0)
+        return INPUT_CONTROL_UP;
+    else if(strcmp(sequence, "[1;5B") == 0)
+        return INPUT_CONTROL_DOWN;
+    else if(strcmp(sequence, "[1;5C") == 0)
+        return INPUT_CONTROL_RIGHT;
+    else if(strcmp(sequence, "[1;5D") == 0)
+        return INPUT_CONTROL_LEFT;
+    else
+        return INPUT_UNKNOWN;
+}
+
 void HandleEscSequence(char* buffer, Editor *editor)
 {
     char sequenceBuffer[MAX_ESCAPE_SEQUENCE_LENGTH] = {0};
     int i = 0;
     int timeoutcheck;
+    struct pollfd pfd;
+    pfd.fd = STDIN_FILENO;
+    pfd.events = POLLIN;
     while (1)
     {
-        timeoutcheck = poll(stdin,  POLLTIMEOUT);
+        timeoutcheck = poll(&pfd, 1, POLLTIMEOUT);
         if (i >= MAX_ESCAPE_SEQUENCE_LENGTH - 1)
             break;
         if (timeoutcheck == 0)
@@ -48,29 +149,23 @@ void HandleEscSequence(char* buffer, Editor *editor)
         read(STDIN_FILENO, &sequenceBuffer[i], 1);
         i++;
     }
-    findEscapeSequenceType(sequenceBuffer[0]);
-}
+    InputType type = FindEscapeSequenceType(sequenceBuffer);
+    executeEscapeSequence(type,buffer ,editor);
 
-InputType FindEscapeSequenceType(char input)
-{
-    switch (input) {
-        case 'A':
-            return INPUT_UP;
-        case 'B':
-            return INPUT_DOWN;
-        case 'C':
-            return INPUT_RIGHT;
-        case 'D':
-            return INPUT_LEFT;
-        default:
-            return INPUT_NORMAL;
-    }
 }
 
 void HandleInputMovement(char* buffer, Editor *editor)
 {
     int movingWay = 0;
-    if (editor->input == 127) //backspace
+    if (editor->delete)
+    {
+        if (editor->cursor < editor->length)
+        {
+            editor->cursor++;
+            movingWay = -1;
+        }
+    }
+    else if (editor->input == 127) //backspace
     {
         if (editor->cursor > 0)
             movingWay = -1;
